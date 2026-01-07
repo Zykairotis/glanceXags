@@ -1901,6 +1901,88 @@ The ID of the todo list. If you want to have multiple todo lists, you must speci
 | <kbd>Down Arrow</kbd> | Focus the last task that was added | When the "Add a task" field is focused |
 | <kbd>Escape</kbd> | Focus the "Add a task" field | When a task is focused |
 
+### Todoist
+
+A Todoist integration widget that displays and manages your Todoist tasks. Requires a Todoist API token.
+
+The widget supports:
+- Viewing tasks with filters (project, label, priority, due date, custom filter)
+- Creating new tasks
+- Marking tasks as complete
+- Deleting tasks
+- Displaying task metadata (due dates, priorities, labels, projects)
+- Subtask support (display and toggle)
+
+Example:
+
+```yaml
+- type: todoist
+  api-token: ${TODOIST_API_TOKEN}
+```
+
+Show today's tasks:
+
+```yaml
+- type: todoist
+  api-token: ${TODOIST_API_TOKEN}
+  filter: today
+```
+
+Show tasks from a specific project:
+
+```yaml
+- type: todoist
+  api-token: ${TODOIST_API_TOKEN}
+  project-id: "123456789"
+```
+
+Show high priority tasks:
+
+```yaml
+- type: todoist
+  api-token: ${TODOIST_API_TOKEN}
+  priority-min: 4
+```
+
+#### Properties
+
+| Name | Type | Required | Default | Description |
+| ---- | ---- | -------- | ------- | ----------- |
+| api-token | string | yes | | Your Todoist API token (use `${TODOIST_API_TOKEN}` environment variable) |
+| filter | string | no | | Custom Todoist filter string (e.g., "today & priority high") |
+| project-id | string | no | | Filter by specific project ID |
+| section-id | string | no | | Filter by specific section ID |
+| label | string | no | | Filter by label name |
+| priority-min | int | no | | Filter by minimum priority (1-4, 4=highest) |
+| due-filter | string | no | | Due date filter: "today", "overdue", "upcoming", "none", "all" |
+| lang | string | no | en | Language code for filter parsing |
+| ids | string | no | | Comma-separated list of specific task IDs to display |
+| assignee | string | no | | Filter by assignee ID |
+| show-completed | bool | no | false | Include completed tasks |
+| show-subtasks | bool | no | true | Display subtasks |
+| limit | int | no | 20 | Maximum number of tasks to show |
+| collapse-after | int | no | 5 | Collapse subtasks after N items |
+| compact-mode | bool | no | false | Use compact list layout |
+| hide-description | bool | no | false | Hide task descriptions by default |
+| default-project-id | string | no | | Default project for new tasks |
+| default-section-id | string | no | | Default section for new tasks |
+| default-priority | int | no | 1 | Default priority for new tasks (1-4) |
+| default-labels | string | no | | Default labels for new tasks (comma-separated) |
+
+##### Getting your Todoist API Token
+
+1. Go to https://todoist.com/app/settings/integrations
+2. Find "Todoist API" section
+3. Copy your API token
+4. Set it as an environment variable: `export TODOIST_API_TOKEN=your_token_here`
+5. Use in config: `api-token: ${TODOIST_API_TOKEN}`
+
+Alternatively, you can use Docker secrets: `api-token: ${secret:todoist_token}`
+
+##### API Rate Limits
+
+Todoist allows 1000 requests per 15 minutes per user. The widget caches data for 5 minutes by default to minimize API calls. You can adjust this with the `cache` property.
+
 ### Monitor
 Display a list of sites and whether they are reachable (online) or not. This is determined by sending a GET request to the specified URL, if the response is 200 then the site is OK. The time it took to receive a response is also shown in milliseconds.
 

@@ -1,0 +1,85 @@
+{{ template "widget-base.html" . }}
+
+{{ define "widget-content" }}
+<div class="todoist" data-widget-id="{{ .GetID }}">
+	{{ if .ErrorMessage }}
+	<div class="todoist-error">{{ .ErrorMessage }}</div>
+	{{ else }}
+	{{ if .Tasks }}
+	<div class="todoist-tasks{{ if .CompactMode }} todoist-compact{{ end }}">
+		{{ range .Tasks }}
+		<div class="todoist-task{{ if .Task.IsCompleted }} todoist-task-completed{{ end }} {{ if .Task.ParentID }} todoist-subtask{{ end }}"
+			 data-task-id="{{ .Task.ID }}"
+			 data-content="{{ .Task.Content }}"
+			 data-has-subtasks="{{ .HasSubtasks }}">
+			<div class="todoist-task-header">
+				<input type="checkbox"
+					   class="todoist-checkbox"
+					   {{ if .Task.IsCompleted }}checked{{ end }}
+					   data-task-id="{{ .Task.ID }}"
+					   aria-label="Mark task as complete">
+				<div class="todoist-task-content">
+					<span class="todoist-task-title">{{ .Task.Content }}</span>
+					{{ if and .Task.Description (not .HideDescription) }}
+					<div class="todoist-task-description">{{ .Task.Description }}</div>
+					{{ end }}
+				</div>
+				<div class="todoist-task-meta">
+					{{ if .Task.Due }}
+					<span class="todoist-due{{ if .Task.Due.IsRecurring }} todoist-recurring{{ end }}">{{ .Task.Due.String }}</span>
+					{{ end }}
+					{{ if .Task.Deadline }}
+					<span class="todoist-deadline" title="Deadline">{{ .Task.Deadline.Date }}</span>
+					{{ end }}
+					{{ if gt .Task.Priority 1 }}
+					<span class="todoist-priority todoist-priority-{{ .Task.Priority }}" title="Priority {{ .Task.Priority }}"></span>
+					{{ end }}
+					{{ if .Labels }}
+					<div class="todoist-labels">
+						{{ range .Labels }}
+						<span class="todoist-label" style="background-color: {{ .Color }}">{{ .Name }}</span>
+						{{ end }}
+					</div>
+					{{ end }}
+					{{ if .Project }}
+					<span class="todoist-project" style="color: {{ .Project.Color }}">{{ .Project.Name }}</span>
+					{{ end }}
+					{{ if gt .Task.CommentCount 0 }}
+					<span class="todoist-comments" title="{{ .Task.CommentCount }} comments">
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+							<path fill-rule="evenodd" d="M10 2c-2.236 0-4.43.18-6.57.524C1.993 2.755 1 4.014 1 5.426v5.148c0 1.413.993 2.67 2.43 2.902.17.032.342.062.514.091v2.209a1.125 1.125 0 001.628 1.006l2.632-1.487c.287-.163.603-.267.932-.296a24.477 24.477 0 004.864-.736c2.137-.345 3.43-2.49 3.43-4.606V5.426c0-1.412-.993-2.671-2.43-2.902A41.496 41.496 0 0010 2zM6.75 6a.75.75 0 01.75-.75h6.5a.75.75 0 010 1.5h-6.5A.75.75 0 016.75 6zm0 2.5a.75.75 0 01.75-.75h6.5a.75.75 0 010 1.5h-6.5a.75.75 0 01-.75-.75z" clip-rule="evenodd" />
+						</svg>
+						{{ .Task.CommentCount }}
+					</span>
+					{{ end }}
+				</div>
+				<button class="todoist-delete" data-task-id="{{ .Task.ID }}" aria-label="Delete task">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+						<path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z" clip-rule="evenodd" />
+					</svg>
+				</button>
+			</div>
+			{{ if .HasSubtasks }}
+			<div class="todoist-subtasks" data-parent-id="{{ .Task.ID }}">
+				<!-- Subtasks would be dynamically loaded here -->
+			</div>
+			{{ end }}
+		</div>
+		{{ end }}
+	</div>
+	{{ else }}
+	<div class="todoist-empty">No tasks found</div>
+	{{ end }}
+	{{ end }}
+
+	<div class="todoist-add-task">
+		<form class="todoist-add-form" data-widget-id="{{ .GetID }}">
+			<input type="text"
+				   class="todoist-add-input"
+				   placeholder="Add a task..."
+				   aria-label="New task content">
+			<button type="submit" class="todoist-add-button">+</button>
+		</form>
+	</div>
+</div>
+{{ end }}

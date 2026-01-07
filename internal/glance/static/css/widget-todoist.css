@@ -1,0 +1,264 @@
+/* Todoist Widget Styles */
+
+.todoist {
+	padding: 0.5rem;
+}
+
+.todoist-error {
+	padding: 1rem;
+	color: var(--negative);
+	text-align: center;
+}
+
+.todoist-tasks {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.todoist-compact .todoist-task {
+	padding: 0.5rem;
+}
+
+.todoist-task {
+	display: flex;
+	flex-direction: column;
+	padding: 0.75rem;
+	border-radius: var(--border-radius);
+	background: rgba(255, 255, 255, 0.03);
+	transition: background-color 0.2s ease;
+}
+
+.todoist-task:hover {
+	background: rgba(255, 255, 255, 0.05);
+}
+
+.todoist-task-completed {
+	opacity: 0.6;
+}
+
+.todoist-task-completed .todoist-task-title {
+	text-decoration: line-through;
+}
+
+.todoist-subtask {
+	margin-left: 1.5rem;
+	border-left: 2px solid rgba(255, 255, 255, 0.1);
+	padding-left: 0.75rem;
+}
+
+.todoist-task-header {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.75rem;
+}
+
+.todoist-checkbox {
+	flex-shrink: 0;
+	width: 1.25rem;
+	height: 1.25rem;
+	margin-top: 0.1rem;
+	cursor: pointer;
+	accent-color: var(--primary);
+}
+
+.todoist-task-content {
+	flex: 1;
+	min-width: 0;
+}
+
+.todoist-task-title {
+	display: block;
+	font-weight: 400;
+	word-break: break-word;
+}
+
+.todoist-task-description {
+	margin-top: 0.25rem;
+	font-size: 0.9em;
+	opacity: 0.8;
+	word-break: break-word;
+}
+
+.todoist-task-meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	align-items: center;
+	flex-shrink: 0;
+	font-size: 0.85rem;
+}
+
+.todoist-due,
+.todoist-deadline {
+	padding: 0.15rem 0.4rem;
+	border-radius: 3px;
+	background: rgba(255, 255, 255, 0.1);
+	font-size: 0.8rem;
+}
+
+.todoist-recurring::after {
+	content: ' ↻';
+}
+
+.todoist-deadline {
+	color: var(--negative);
+}
+
+.todoist-priority {
+	width: 0.6rem;
+	height: 0.6rem;
+	border-radius: 50%;
+	display: inline-block;
+}
+
+.priority-normal { background: #888; }
+.priority-medium { background: #ff9800; }
+.priority-high { background: #ff5722; }
+.priority-urgent { background: #f44336; }
+
+.todoist-labels {
+	display: flex;
+	gap: 0.25rem;
+	flex-wrap: wrap;
+}
+
+.todoist-label {
+	padding: 0.1rem 0.4rem;
+	border-radius: 3px;
+	font-size: 0.75rem;
+	font-weight: 500;
+}
+
+.todoist-project {
+	font-size: 0.8rem;
+	opacity: 0.8;
+}
+
+.todoist-comments {
+	display: flex;
+	align-items: center;
+	gap: 0.25rem;
+	font-size: 0.8rem;
+	opacity: 0.8;
+}
+
+.todoist-comments svg {
+	width: 1rem;
+	height: 1rem;
+}
+
+.todoist-delete {
+	flex-shrink: 0;
+	padding: 0.25rem;
+	background: none;
+	border: none;
+	color: var(--paragraph);
+	cursor: pointer;
+	opacity: 0;
+	transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.todoist-delete:hover {
+	color: var(--negative);
+}
+
+.todoist-task:hover .todoist-delete {
+	opacity: 0.6;
+}
+
+.todoist-delete:active {
+	opacity: 1;
+}
+
+.todoist-delete svg {
+	width: 1rem;
+	height: 1rem;
+}
+
+.todoist-subtasks {
+	margin-top: 0.5rem;
+	display: none;
+}
+
+.todoist-task[data-has-subtasks="true"] .todoist-subtasks {
+	display: block;
+}
+
+.todoist-empty {
+	padding: 2rem;
+	text-align: center;
+	opacity: 0.6;
+}
+
+.todoist-add-task {
+	margin-top: 1rem;
+	padding-top: 1rem;
+	border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.todoist-add-form {
+	display: flex;
+	gap: 0.5rem;
+	align-items: center;
+}
+
+.todoist-add-input {
+	flex: 1;
+	padding: 0.5rem 0.75rem;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	border-radius: var(--border-radius);
+	background: rgba(255, 255, 255, 0.05);
+	color: var(--paragraph);
+	font-size: 0.95rem;
+}
+
+.todoist-add-input:focus {
+	outline: none;
+	border-color: var(--primary);
+	background: rgba(255, 255, 255, 0.08);
+}
+
+.todoist-add-input::placeholder {
+	opacity: 0.5;
+}
+
+.todoist-add-button {
+	flex-shrink: 0;
+	width: 2rem;
+	height: 2rem;
+	padding: 0;
+	border: none;
+	border-radius: var(--border-radius);
+	background: var(--primary);
+	color: white;
+	font-size: 1.5rem;
+	line-height: 1;
+	cursor: pointer;
+	transition: opacity 0.2s ease;
+}
+
+.todoist-add-button:hover {
+	opacity: 0.9;
+}
+
+.todoist-add-button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+	.todoist-task-meta {
+		font-size: 0.8rem;
+	}
+
+	.todoist-task-header {
+		flex-wrap: wrap;
+	}
+
+	.todoist-task-meta {
+		width: 100%;
+		margin-left: 2rem;
+	}
+}
