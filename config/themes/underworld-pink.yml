@@ -1,0 +1,7 @@
+# Underworld (Pink) - Dark theme with neon pink accents
+theme:
+  background-color: 0 0 3
+  primary-color: 320 100 55
+  positive-color: 320 100 50
+  negative-color: 320 100 60
+  contrast-multiplier: 1.4

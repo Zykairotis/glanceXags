@@ -1,0 +1,7 @@
+# Underworld (Blue) - Dark theme with electric blue accents
+theme:
+  background-color: 0 0 3
+  primary-color: 210 100 55
+  positive-color: 210 100 50
+  negative-color: 210 100 60
+  contrast-multiplier: 1.4

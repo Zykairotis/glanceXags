@@ -1,0 +1,9 @@
+services:
+  glance-ags:
+    container_name: glance-ags
+    image: glanceapp/glance
+    restart: unless-stopped
+    volumes:
+      - ./config:/app/config
+    ports:
+      - 6677:8080

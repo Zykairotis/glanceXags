@@ -1,0 +1,7 @@
+# Underworld (Purple) - Dark theme with mystical purple accents
+theme:
+  background-color: 0 0 3
+  primary-color: 280 100 55
+  positive-color: 280 100 50
+  negative-color: 280 100 60
+  contrast-multiplier: 1.4

@@ -1,0 +1,7 @@
+# Underworld (Green) - Dark theme with toxic green accents
+theme:
+  background-color: 0 0 3
+  primary-color: 120 100 50
+  positive-color: 120 100 45
+  negative-color: 120 100 60
+  contrast-multiplier: 1.4

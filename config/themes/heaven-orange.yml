@@ -1,0 +1,8 @@
+# Heaven (Orange) - Light theme with warm orange accents
+theme:
+  light: true
+  background-color: 0 0 98
+  primary-color: 25 90 55
+  positive-color: 25 90 50
+  negative-color: 25 95 60
+  contrast-multiplier: 1.0

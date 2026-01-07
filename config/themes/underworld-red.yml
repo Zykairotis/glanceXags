@@ -1,0 +1,7 @@
+# Underworld (Red) - Dark theme with blood red accents
+theme:
+  background-color: 0 0 3
+  primary-color: 0 100 50
+  positive-color: 0 100 45
+  negative-color: 0 100 60
+  contrast-multiplier: 1.4
