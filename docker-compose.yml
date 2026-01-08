@@ -9,3 +9,15 @@ services:
       - ./config:/app/config
     ports:
       - 6677:8080
+
+  youtube-api:
+    container_name: youtube-api
+    build: ./unofficial-apis/Youtube-data-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - YOUTUBE_API_HOST=${YOUTUBE_API_HOST:-0.0.0.0}
+      - YOUTUBE_API_PORT=${YOUTUBE_API_PORT:-8000}
+    ports:
+      - "${YOUTUBE_API_PORT:-8000}:8000"
