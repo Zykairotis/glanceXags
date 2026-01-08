@@ -1,264 +1,793 @@
-/* Todoist Widget Styles */
+/* Todoist Widget Styles - Using Glance CSS patterns */
 
-.todoist {
-	padding: 0.5rem;
+/* Checkbox styling - following widget-todo.css pattern */
+.todoist-checkbox {
+    -webkit-appearance: none;
+    appearance: none;
+    border: 2px solid var(--color-text-subdue);
+    width: 1.4rem;
+    height: 1.4rem;
+    position: relative;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: border-color .2s;
+    flex-shrink: 0;
+    margin-top: 0.2rem;
 }
 
-.todoist-error {
-	padding: 1rem;
-	color: var(--negative);
-	text-align: center;
+.todoist-checkbox::before {
+    content: "";
+    inset: -1rem;
+    position: absolute;
 }
 
-.todoist-tasks {
-	display: flex;
-	flex-direction: column;
-	gap: 0.75rem;
+.todoist-checkbox::after {
+    content: '';
+    position: absolute;
+    inset: 0.25rem;
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity .2s;
 }
 
-.todoist-compact .todoist-task {
-	padding: 0.5rem;
+.todoist-checkbox:checked::after {
+    background: var(--color-primary);
+    opacity: 1;
 }
 
+.todoist-checkbox:focus-visible {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+.todoist-checkbox:hover {
+    border-color: var(--color-text-base);
+}
+
+/* Task styling */
 .todoist-task {
-	display: flex;
-	flex-direction: column;
-	padding: 0.75rem;
-	border-radius: var(--border-radius);
-	background: rgba(255, 255, 255, 0.03);
-	transition: background-color 0.2s ease;
+    transition: background-color 0.2s;
+    padding: 0.3rem 0;
 }
 
-.todoist-task:hover {
-	background: rgba(255, 255, 255, 0.05);
-}
-
-.todoist-task-completed {
-	opacity: 0.6;
-}
-
-.todoist-task-completed .todoist-task-title {
-	text-decoration: line-through;
+.todoist-task-completed .todoist-task-content .title {
+    text-decoration: line-through;
+    color: var(--color-text-subdue);
 }
 
 .todoist-subtask {
-	margin-left: 1.5rem;
-	border-left: 2px solid rgba(255, 255, 255, 0.1);
-	padding-left: 0.75rem;
+    margin-left: 2rem;
+    border-left: 2px solid var(--color-separator);
+    padding-left: 1rem;
 }
 
-.todoist-task-header {
-	display: flex;
-	align-items: flex-start;
-	gap: 0.75rem;
+/* Description toggle */
+.todoist-desc-toggle {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: var(--color-text-subdue);
+    transition: color 0.2s, transform 0.2s;
 }
 
-.todoist-checkbox {
-	flex-shrink: 0;
-	width: 1.25rem;
-	height: 1.25rem;
-	margin-top: 0.1rem;
-	cursor: pointer;
-	accent-color: var(--primary);
+.todoist-desc-toggle:hover {
+    color: var(--color-text-base);
 }
 
-.todoist-task-content {
-	flex: 1;
-	min-width: 0;
+.todoist-desc-toggle.expanded svg {
+    transform: rotate(180deg);
 }
 
-.todoist-task-title {
-	display: block;
-	font-weight: 400;
-	word-break: break-word;
-}
-
+/* Description content */
 .todoist-task-description {
-	margin-top: 0.25rem;
-	font-size: 0.9em;
-	opacity: 0.8;
-	word-break: break-word;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: var(--color-widget-background-highlight);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-h5);
+    color: var(--color-text-paragraph);
+    line-height: 1.5;
 }
 
-.todoist-task-meta {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 0.5rem;
-	align-items: center;
-	flex-shrink: 0;
-	font-size: 0.85rem;
+/* Collapsed state */
+.collapsed {
+    display: none !important;
 }
 
-.todoist-due,
-.todoist-deadline {
-	padding: 0.15rem 0.4rem;
-	border-radius: 3px;
-	background: rgba(255, 255, 255, 0.1);
-	font-size: 0.8rem;
-}
-
-.todoist-recurring::after {
-	content: ' ↻';
-}
-
-.todoist-deadline {
-	color: var(--negative);
-}
-
+/* Priority indicators */
 .todoist-priority {
-	width: 0.6rem;
-	height: 0.6rem;
-	border-radius: 50%;
-	display: inline-block;
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    display: inline-block;
 }
 
-.priority-normal { background: #888; }
-.priority-medium { background: #ff9800; }
-.priority-high { background: #ff5722; }
-.priority-urgent { background: #f44336; }
+.todoist-priority-1 { background: var(--color-text-subdue); }
+.todoist-priority-2 { background: #ff9800; }
+.todoist-priority-3 { background: #ff5722; }
+.todoist-priority-4 { background: var(--color-negative); }
 
-.todoist-labels {
-	display: flex;
-	gap: 0.25rem;
-	flex-wrap: wrap;
+/* Action buttons */
+.todoist-task-actions {
+    opacity: 0;
+    transition: opacity 0.2s;
 }
 
-.todoist-label {
-	padding: 0.1rem 0.4rem;
-	border-radius: 3px;
-	font-size: 0.75rem;
-	font-weight: 500;
+.todoist-task:hover .todoist-task-actions {
+    opacity: 1;
 }
 
-.todoist-project {
-	font-size: 0.8rem;
-	opacity: 0.8;
+.todoist-subtask-btn,
+.todoist-edit,
+.todoist-delete,
+.todoist-comments-btn,
+.todoist-desc-toggle {
+    background: none;
+    border: none;
+    padding: 0.2rem;
+    cursor: pointer;
+    color: var(--color-text-subdue);
+    transition: color 0.2s;
+    display: inline-flex;
+    align-items: center;
 }
 
-.todoist-comments {
-	display: flex;
-	align-items: center;
-	gap: 0.25rem;
-	font-size: 0.8rem;
-	opacity: 0.8;
+.todoist-subtask-btn:hover { color: var(--color-positive); }
+.todoist-edit:hover { color: var(--color-primary); }
+.todoist-delete:hover { color: var(--color-negative); }
+.todoist-comments-btn:hover { color: var(--color-text-highlight); }
+
+/* Subtask form */
+.todoist-subtask-form {
+    padding: 0.5rem;
+    background: var(--color-widget-background-highlight);
+    border-radius: var(--border-radius);
 }
 
-.todoist-comments svg {
-	width: 1rem;
-	height: 1rem;
+.todoist-subtask-input {
+    background: var(--color-background);
+    border: 1px solid var(--color-separator);
+    border-radius: var(--border-radius);
+    padding: 0.4rem 0.6rem;
+    color: var(--color-text-highlight);
+    font-size: var(--font-size-base);
 }
 
-.todoist-delete {
-	flex-shrink: 0;
-	padding: 0.25rem;
-	background: none;
-	border: none;
-	color: var(--paragraph);
-	cursor: pointer;
-	opacity: 0;
-	transition: opacity 0.2s ease, color 0.2s ease;
+.todoist-subtask-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
 }
 
-.todoist-delete:hover {
-	color: var(--negative);
+/* Comments section */
+.todoist-comments-section {
+    padding: 0.75rem;
+    background: var(--color-widget-background-highlight);
+    border-radius: var(--border-radius);
+    border-left: 2px solid var(--color-primary);
 }
 
-.todoist-task:hover .todoist-delete {
-	opacity: 0.6;
+.todoist-comments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 250px;
+    overflow-y: auto;
 }
 
-.todoist-delete:active {
-	opacity: 1;
+.todoist-comment {
+    padding: 0.75rem;
+    background: var(--color-background);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--color-separator);
 }
 
-.todoist-delete svg {
-	width: 1rem;
-	height: 1rem;
+.todoist-comment-content {
+    font-size: var(--font-size-base);
+    color: var(--color-text-paragraph);
+    line-height: 1.6;
+    cursor: text;
 }
 
-.todoist-subtasks {
-	margin-top: 0.5rem;
-	display: none;
+.todoist-comment-content:hover {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: var(--border-radius);
 }
 
-.todoist-task[data-has-subtasks="true"] .todoist-subtasks {
-	display: block;
+/* Markdown styling */
+.todoist-comment-content p {
+    margin: 0 0 0.5rem 0;
 }
 
-.todoist-empty {
-	padding: 2rem;
-	text-align: center;
-	opacity: 0.6;
+.todoist-comment-content p:last-child {
+    margin-bottom: 0;
 }
 
-.todoist-add-task {
-	margin-top: 1rem;
-	padding-top: 1rem;
-	border-top: 1px solid rgba(255, 255, 255, 0.1);
+.todoist-comment-content a {
+    color: var(--color-primary);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--color-primary);
 }
 
-.todoist-add-form {
-	display: flex;
-	gap: 0.5rem;
-	align-items: center;
+.todoist-comment-content a:hover {
+    opacity: 0.8;
+    border-bottom-style: solid;
 }
 
+.todoist-comment-content strong {
+    font-weight: 600;
+    color: var(--color-text-highlight);
+}
+
+.todoist-comment-content em {
+    font-style: italic;
+}
+
+.todoist-comment-content code {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 0.15rem 0.4rem;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9em;
+}
+
+.todoist-comment-content pre {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.75rem;
+    border-radius: var(--border-radius);
+    overflow-x: auto;
+    margin: 0.5rem 0;
+}
+
+.todoist-comment-content pre code {
+    background: none;
+    padding: 0;
+}
+
+/* Comment edit mode */
+.todoist-comment.editing {
+    background: var(--color-widget-background-highlight);
+}
+
+.todoist-comment-edit-input {
+    width: 100%;
+    background: var(--color-background);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--border-radius);
+    padding: 0.5rem;
+    color: var(--color-text-highlight);
+    font-size: var(--font-size-base);
+    font-family: inherit;
+    resize: vertical;
+    min-height: 60px;
+}
+
+.todoist-comment-edit-input:focus {
+    outline: none;
+}
+
+.todoist-edit-hint {
+    font-size: var(--font-size-h6);
+    color: var(--color-text-subdue);
+    margin-top: 0.25rem;
+    font-style: italic;
+}
+
+.todoist-comment-meta {
+    font-size: var(--font-size-h6);
+    color: var(--color-text-subdue);
+    margin-top: 0.25rem;
+}
+
+.todoist-no-comments,
+.todoist-loading {
+    text-align: center;
+    color: var(--color-text-subdue);
+    padding: 1rem;
+    font-size: var(--font-size-h5);
+}
+
+.todoist-comment-input {
+    background: var(--color-background);
+    border: 1px solid var(--color-separator);
+    border-radius: var(--border-radius);
+    padding: 0.5rem;
+    color: var(--color-text-highlight);
+    font-size: var(--font-size-base);
+    resize: vertical;
+    min-height: 50px;
+}
+
+.todoist-comment-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+/* Add task form */
 .todoist-add-input {
-	flex: 1;
-	padding: 0.5rem 0.75rem;
-	border: 1px solid rgba(255, 255, 255, 0.1);
-	border-radius: var(--border-radius);
-	background: rgba(255, 255, 255, 0.05);
-	color: var(--paragraph);
-	font-size: 0.95rem;
+    background: var(--color-background);
+    border: 1px solid var(--color-separator);
+    border-radius: var(--border-radius);
+    padding: 0.5rem 0.75rem;
+    color: var(--color-text-highlight);
+    font-size: var(--font-size-base);
 }
 
 .todoist-add-input:focus {
-	outline: none;
-	border-color: var(--primary);
-	background: rgba(255, 255, 255, 0.08);
+    outline: none;
+    border-color: var(--color-primary);
 }
 
 .todoist-add-input::placeholder {
-	opacity: 0.5;
+    color: var(--color-text-subdue);
 }
 
-.todoist-add-button {
-	flex-shrink: 0;
-	width: 2rem;
-	height: 2rem;
-	padding: 0;
-	border: none;
-	border-radius: var(--border-radius);
-	background: var(--primary);
-	color: white;
-	font-size: 1.5rem;
-	line-height: 1;
-	cursor: pointer;
-	transition: opacity 0.2s ease;
+/* Buttons - using Glance button pattern */
+.button {
+    background: var(--color-primary);
+    color: var(--color-background);
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 0.4rem 0.8rem;
+    font-size: var(--font-size-h5);
+    cursor: pointer;
+    transition: opacity 0.2s;
 }
 
-.todoist-add-button:hover {
-	opacity: 0.9;
+.button:hover {
+    opacity: 0.9;
 }
 
-.todoist-add-button:disabled {
-	opacity: 0.5;
-	cursor: not-allowed;
+.button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.button-small {
+    padding: 0.3rem 0.6rem;
+    font-size: var(--font-size-h6);
+}
+
+.button-secondary {
+    background: var(--color-separator);
+    color: var(--color-text-base);
+}
+
+/* Modal styles */
+.todoist-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.75);
+}
+
+.modal {
+    position: relative;
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: var(--color-widget-background);
+    border: 1px solid var(--color-widget-content-border);
+    border-radius: var(--border-radius);
+    box-shadow: 0px 3px 15px rgba(0, 0, 0, 0.3);
+    padding: 1.25rem;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: var(--font-size-h3);
+    color: var(--color-text-highlight);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--color-text-subdue);
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+}
+
+.modal-close:hover {
+    color: var(--color-text-highlight);
+}
+
+/* Form elements */
+.form-group {
+    margin-bottom: 0.75rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-size: var(--font-size-h5);
+    color: var(--color-text-base);
+}
+
+.todoist-edit-content,
+.todoist-edit-description,
+.todoist-edit-due,
+.todoist-edit-priority {
+    background: var(--color-background);
+    border: 1px solid var(--color-separator);
+    border-radius: var(--border-radius);
+    padding: 0.5rem;
+    color: var(--color-text-highlight);
+    font-size: var(--font-size-base);
+}
+
+.todoist-edit-content:focus,
+.todoist-edit-description:focus,
+.todoist-edit-due:focus,
+.todoist-edit-priority:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+.todoist-edit-priority {
+    cursor: pointer;
+}
+
+/* Width utilities not in Glance */
+.width-full {
+    width: 100%;
+}
+
+.width-1 {
+    width: 1.2rem;
+}
+
+.height-1 {
+    height: 1.2rem;
+}
+
+.margin-left-1 {
+    margin-left: 0.4rem;
+}
+
+.margin-left-3 {
+    margin-left: 1.5rem;
+}
+
+.margin-right-1 {
+    margin-right: 0.4rem;
+}
+
+.margin-top-1 {
+    margin-top: 0.5rem;
+}
+
+.margin-top-2 {
+    margin-top: 0.75rem;
+}
+
+.gap-2 {
+    gap: 0.5rem;
+}
+
+.padding-top-2 {
+    padding-top: 0.75rem;
+}
+
+.border-top-1 {
+    border-top: 1px solid var(--color-separator);
+}
+
+.vertical-align-middle {
+    vertical-align: middle;
+}
+
+.text-subdued {
+    color: var(--color-text-subdue);
+}
+
+.text-strikethrough {
+    text-decoration: line-through;
+}
+
+.size-text-dynamic {
+    font-size: var(--font-size-base);
+    color: var(--color-text-highlight);
+}
+
+.tag {
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    font-size: var(--font-size-h6);
+}
+
+.widget-empty {
+    text-align: center;
+    color: var(--color-text-subdue);
+    padding: 2rem;
+    font-size: var(--font-size-base);
+}
+
+/* Rich Text Editor Modal */
+.todoist-editor-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.todoist-editor-modal .editor-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+}
+
+.todoist-editor-modal .editor-container {
+    position: relative;
+    width: 80%;
+    min-width: 600px;
+    max-width: 1200px;
+    max-height: 85vh;
+    background: var(--color-widget-background);
+    border: 1px solid var(--color-widget-content-border);
+    border-radius: var(--border-radius);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+}
+
+.editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--color-separator);
+}
+
+.editor-title {
+    font-size: var(--font-size-h3);
+    color: var(--color-text-highlight);
+    font-weight: 500;
+}
+
+.editor-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--color-text-subdue);
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    transition: color 0.2s;
+}
+
+.editor-close:hover {
+    color: var(--color-text-highlight);
+}
+
+/* Toolbar */
+.editor-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--color-separator);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.editor-toolbar button {
+    padding: 0.4rem 0.6rem;
+    border-radius: var(--border-radius);
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--color-text-base);
+    cursor: pointer;
+    font-size: var(--font-size-h5);
+    transition: all 0.2s;
+}
+
+.editor-toolbar button:hover {
+    background: var(--color-widget-background-highlight);
+    border-color: var(--color-separator);
+    color: var(--color-primary);
+}
+
+.editor-toolbar button:active {
+    transform: scale(0.95);
+}
+
+/* Preview toggle button */
+.editor-preview-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-left: auto;
+}
+
+.editor-preview-toggle.active {
+    background: var(--color-widget-background-highlight);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.toolbar-separator {
+    width: 1px;
+    background: var(--color-separator);
+    margin: 0 0.25rem;
+}
+
+/* Editor body - split view */
+.editor-body {
+    display: flex;
+    flex: 1;
+    min-height: 350px;
+    max-height: 60vh;
+}
+
+/* Preview hidden state */
+.editor-body.preview-hidden .editor-preview {
+    display: none;
+}
+
+.editor-body.preview-hidden .editor-input {
+    flex: 1;
+}
+
+.editor-input {
+    flex: 1;
+    resize: none;
+    padding: 1rem;
+    border: none;
+    background: var(--color-background);
+    color: var(--color-text-highlight);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: var(--font-size-base);
+    line-height: 1.6;
+}
+
+.editor-input:focus {
+    outline: none;
+}
+
+.editor-input::placeholder {
+    color: var(--color-text-subdue);
+}
+
+.editor-preview {
+    flex: 1;
+    padding: 1rem;
+    border-left: 1px solid var(--color-separator);
+    overflow-y: auto;
+    background: rgba(255, 255, 255, 0.01);
+    color: var(--color-text-paragraph);
+    font-size: var(--font-size-base);
+    line-height: 1.6;
+}
+
+.editor-preview p {
+    margin: 0 0 0.5rem 0;
+}
+
+.editor-preview p:last-child {
+    margin-bottom: 0;
+}
+
+.editor-preview a {
+    color: var(--color-primary);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--color-primary);
+}
+
+.editor-preview strong {
+    font-weight: 600;
+    color: var(--color-text-highlight);
+}
+
+.editor-preview em {
+    font-style: italic;
+}
+
+.editor-preview code {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 0.15rem 0.4rem;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9em;
+}
+
+.editor-preview pre {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.75rem;
+    border-radius: var(--border-radius);
+    overflow-x: auto;
+    margin: 0.5rem 0;
+}
+
+.editor-preview pre code {
+    background: none;
+    padding: 0;
+}
+
+.editor-preview h1, .editor-preview h2, .editor-preview h3 {
+    color: var(--color-text-highlight);
+    margin: 0.5rem 0;
+}
+
+.editor-preview h1 { font-size: var(--font-size-h1); }
+.editor-preview h2 { font-size: var(--font-size-h2); }
+.editor-preview h3 { font-size: var(--font-size-h3); }
+
+.editor-preview ul, .editor-preview ol {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+}
+
+.editor-preview li {
+    margin: 0.25rem 0;
+}
+
+/* Footer */
+.editor-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--color-separator);
+}
+
+.editor-hint {
+    font-size: var(--font-size-h6);
+    color: var(--color-text-subdue);
+}
+
+.editor-actions {
+    display: flex;
+    gap: 0.5rem;
 }
 
 /* Mobile responsive */
 @media (max-width: 768px) {
-	.todoist-task-meta {
-		font-size: 0.8rem;
-	}
+    .todoist-task-actions {
+        opacity: 1;
+    }
 
-	.todoist-task-header {
-		flex-wrap: wrap;
-	}
+    .modal {
+        width: 95%;
+        padding: 1rem;
+    }
 
-	.todoist-task-meta {
-		width: 100%;
-		margin-left: 2rem;
-	}
+    .todoist-editor-modal .editor-container {
+        width: 95%;
+        min-width: auto;
+    }
+
+    .editor-body {
+        flex-direction: column;
+    }
+
+    .editor-preview {
+        border-left: none;
+        border-top: 1px solid var(--color-separator);
+        max-height: 150px;
+    }
 }

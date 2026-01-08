@@ -96,17 +96,13 @@ pages:
               - immich-app/immich
               - syncthing/syncthing
 
-  # Add more pages here:
-  # - name: Your page name
-  #   columns:
-  #     - size: small
-  #       widgets:
-  #         # Add widgets here
-
-  #     - size: full
-  #       widgets:
-  #         # Add widgets here
-
-  #     - size: small
-  #       widgets:
-  #         # Add widgets here
+  - name: Todoist
+    columns:
+      - size: full
+        widgets:
+          - type: todoist
+            title: My Tasks
+            api-token: ${TODOIST_TOKEN}
+            limit: 30
+            show-subtasks: true
+            due-filter: all

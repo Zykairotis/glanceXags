@@ -1,8 +1,10 @@
 services:
   glance-ags:
     container_name: glance-ags
-    image: glanceapp/glance
+    build: .
     restart: unless-stopped
+    env_file:
+      - .env
     volumes:
       - ./config:/app/config
     ports:

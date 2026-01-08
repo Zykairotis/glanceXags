@@ -24,29 +24,29 @@ type todoistWidget struct {
 	APIToken string `yaml:"api-token"`
 
 	// Task Filtering
-	Filter        string `yaml:"filter"`
-	ProjectID     string `yaml:"project-id"`
-	SectionID     string `yaml:"section-id"`
-	Label         string `yaml:"label"`
-	PriorityMin   int    `yaml:"priority-min"`
-	DueFilter     string `yaml:"due-filter"`
-	Lang          string `yaml:"lang"`
-	IDs           string `yaml:"ids"`
-	Assignee      string `yaml:"assignee"`
+	Filter      string `yaml:"filter"`
+	ProjectID   string `yaml:"project-id"`
+	SectionID   string `yaml:"section-id"`
+	Label       string `yaml:"label"`
+	PriorityMin int    `yaml:"priority-min"`
+	DueFilter   string `yaml:"due-filter"`
+	Lang        string `yaml:"lang"`
+	IDs         string `yaml:"ids"`
+	Assignee    string `yaml:"assignee"`
 
 	// Display Options
-	ShowCompleted bool   `yaml:"show-completed"`
-	ShowSubtasks  bool   `yaml:"show-subtasks"`
-	Limit         int    `yaml:"limit"`
-	CollapseAfter int    `yaml:"collapse-after"`
-	CompactMode   bool   `yaml:"compact-mode"`
+	ShowCompleted   bool `yaml:"show-completed"`
+	ShowSubtasks    bool `yaml:"show-subtasks"`
+	Limit           int  `yaml:"limit"`
+	CollapseAfter   int  `yaml:"collapse-after"`
+	CompactMode     bool `yaml:"compact-mode"`
 	HideDescription bool `yaml:"hide-description"`
 
 	// Task Creation Defaults
 	DefaultProjectID string `yaml:"default-project-id"`
 	DefaultSectionID string `yaml:"default-section-id"`
 	DefaultPriority  int    `yaml:"default-priority"`
-	DefaultLabels     string `yaml:"default-labels"`
+	DefaultLabels    string `yaml:"default-labels"`
 
 	// API client (runtime only)
 	client *todoist.Client `yaml:"-"`
@@ -60,10 +60,11 @@ type todoistWidget struct {
 
 // todoistTaskView represents a task with its project and labels for display
 type todoistTaskView struct {
-	Task     *todoist.Task
-	Project  *todoist.Project
-	Labels   []todoist.Label
+	Task        *todoist.Task
+	Project     *todoist.Project
+	Labels      []todoist.Label
 	HasSubtasks bool
+	Subtasks    []todoistTaskView // Nested subtasks for rendering
 }
 
 func (widget *todoistWidget) initialize() error {
@@ -108,7 +109,7 @@ func (widget *todoistWidget) update(ctx context.Context) {
 
 	// Parse IDs if provided
 	if widget.IDs != "" {
-	 ids := strings.Split(widget.IDs, ",")
+		ids := strings.Split(widget.IDs, ",")
 		for i := range ids {
 			ids[i] = strings.TrimSpace(ids[i])
 		}
@@ -271,9 +272,9 @@ func (widget *todoistWidget) update(ctx context.Context) {
 		}
 
 		taskViews = append(taskViews, todoistTaskView{
-			Task:   task,
+			Task:    task,
 			Project: project,
-			Labels: taskLabels,
+			Labels:  taskLabels,
 		})
 	}
 
@@ -284,7 +285,35 @@ func (widget *todoistWidget) update(ctx context.Context) {
 		}
 	}
 
-	widget.Tasks = taskViews
+	// Group subtasks under their parents
+	taskViewsMap := make(map[string]*todoistTaskView)
+	for i := range taskViews {
+		taskViewsMap[taskViews[i].Task.ID] = &taskViews[i]
+	}
+
+	// Build nested structure - only keep top-level tasks, attach subtasks to their parents
+	topLevelTasks := make([]todoistTaskView, 0)
+	for i := range taskViews {
+		task := &taskViews[i]
+		if task.Task.ParentID == "" {
+			// This is a top-level task
+			topLevelTasks = append(topLevelTasks, *task)
+		} else {
+			// This is a subtask - attach to parent
+			if parent, ok := taskViewsMap[task.Task.ParentID]; ok {
+				parent.Subtasks = append(parent.Subtasks, *task)
+			}
+		}
+	}
+
+	// Update the parent references in topLevelTasks with their populated subtasks
+	for i := range topLevelTasks {
+		if original, ok := taskViewsMap[topLevelTasks[i].Task.ID]; ok {
+			topLevelTasks[i].Subtasks = original.Subtasks
+		}
+	}
+
+	widget.Tasks = topLevelTasks
 	widget.ContentAvailable = true
 	widget.Error = nil
 }
@@ -301,95 +330,194 @@ func (widget *todoistWidget) handleRequest(w http.ResponseWriter, r *http.Reques
 	}
 
 	ctx := r.Context()
+	path := strings.TrimPrefix(r.URL.Path, "/api/widgets/"+fmt.Sprint(widget.ID))
 
 	switch r.Method {
-	case http.MethodPost:
-		// Create a new task
-		var req todoist.CreateTaskRequest
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			http.Error(w, "invalid request body", http.StatusBadRequest)
-			return
-		}
-
-		// Apply defaults if not specified
-		if req.ProjectID == "" && widget.DefaultProjectID != "" {
-			req.ProjectID = widget.DefaultProjectID
-		}
-		if req.Priority == 0 && widget.DefaultPriority > 0 {
-			req.Priority = widget.DefaultPriority
-		}
-		if len(req.Labels) == 0 && widget.DefaultLabels != "" {
-			req.Labels = strings.Split(widget.DefaultLabels, ",")
-			for i := range req.Labels {
-				req.Labels[i] = strings.TrimSpace(req.Labels[i])
+	case http.MethodGet:
+		// GET comments for a task: /tasks/{id}/comments
+		if strings.Contains(path, "/comments") {
+			parts := strings.Split(strings.TrimPrefix(path, "/tasks/"), "/")
+			if len(parts) < 2 {
+				http.Error(w, "invalid path", http.StatusBadRequest)
+				return
 			}
-		}
+			taskID := parts[0]
 
-		task, err := widget.client.CreateTask(ctx, &req)
-		if err != nil {
-			slog.Error("Failed to create Todoist task", "error", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			comments, err := widget.client.GetComments(ctx, &todoist.GetCommentsOptions{TaskID: taskID})
+			if err != nil {
+				slog.Error("Failed to get Todoist comments", "error", err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(comments)
 			return
 		}
+		http.Error(w, "not found", http.StatusNotFound)
 
-		widget.scheduleEarlyUpdate()
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(task)
-
-	case http.MethodPut:
-		// Update or close a task
-		path := strings.TrimPrefix(r.URL.Path, "/api/widgets/"+fmt.Sprint(widget.ID))
-
+	case http.MethodPost:
 		switch {
+		// Close task: /tasks/{id}/close
 		case strings.HasSuffix(path, "/close"):
-			// Extract task ID from path like /tasks/{id}/close
 			parts := strings.Split(path, "/")
 			if len(parts) < 3 {
 				http.Error(w, "invalid task ID", http.StatusBadRequest)
 				return
 			}
-
 			taskID := parts[len(parts)-2]
 			if err := widget.client.CloseTask(ctx, taskID); err != nil {
 				slog.Error("Failed to close Todoist task", "error", err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-
 			widget.scheduleEarlyUpdate()
 			w.WriteHeader(http.StatusNoContent)
 
+		// Reopen task: /tasks/{id}/reopen
 		case strings.HasSuffix(path, "/reopen"):
 			parts := strings.Split(path, "/")
 			if len(parts) < 3 {
 				http.Error(w, "invalid task ID", http.StatusBadRequest)
 				return
 			}
-
 			taskID := parts[len(parts)-2]
 			if err := widget.client.ReopenTask(ctx, taskID); err != nil {
 				slog.Error("Failed to reopen Todoist task", "error", err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-
 			widget.scheduleEarlyUpdate()
 			w.WriteHeader(http.StatusNoContent)
+
+		// Create comment: /tasks/{id}/comments
+		case strings.HasSuffix(path, "/comments"):
+			parts := strings.Split(strings.TrimPrefix(path, "/tasks/"), "/")
+			if len(parts) < 2 {
+				http.Error(w, "invalid path", http.StatusBadRequest)
+				return
+			}
+			taskID := parts[0]
+
+			var req struct {
+				Content string `json:"content"`
+			}
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				http.Error(w, "invalid request body", http.StatusBadRequest)
+				return
+			}
+
+			comment, err := widget.client.CreateComment(ctx, &todoist.CreateCommentRequest{
+				TaskID:  taskID,
+				Content: req.Content,
+			})
+			if err != nil {
+				slog.Error("Failed to create Todoist comment", "error", err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusCreated)
+			json.NewEncoder(w).Encode(comment)
+
+		// Create task: /tasks
+		case path == "/tasks" || path == "/tasks/":
+			var req todoist.CreateTaskRequest
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				http.Error(w, "invalid request body", http.StatusBadRequest)
+				return
+			}
+
+			// Apply defaults if not specified
+			if req.ProjectID == "" && widget.DefaultProjectID != "" {
+				req.ProjectID = widget.DefaultProjectID
+			}
+			if req.Priority == 0 && widget.DefaultPriority > 0 {
+				req.Priority = widget.DefaultPriority
+			}
+			if len(req.Labels) == 0 && widget.DefaultLabels != "" {
+				req.Labels = strings.Split(widget.DefaultLabels, ",")
+				for i := range req.Labels {
+					req.Labels[i] = strings.TrimSpace(req.Labels[i])
+				}
+			}
+
+			task, err := widget.client.CreateTask(ctx, &req)
+			if err != nil {
+				slog.Error("Failed to create Todoist task", "error", err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			widget.scheduleEarlyUpdate()
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(task)
 
 		default:
 			http.Error(w, "unknown action", http.StatusNotFound)
 		}
 
+	case http.MethodPut:
+		// Update comment: /comments/{id}
+		if strings.HasPrefix(path, "/comments/") {
+			commentID := strings.TrimPrefix(path, "/comments/")
+			commentID = strings.Split(commentID, "/")[0]
+
+			var req struct {
+				Content string `json:"content"`
+			}
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				http.Error(w, "invalid request body", http.StatusBadRequest)
+				return
+			}
+
+			comment, err := widget.client.UpdateCommentContent(ctx, commentID, req.Content)
+			if err != nil {
+				slog.Error("Failed to update Todoist comment", "error", err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(comment)
+			return
+		}
+
+		// Update task: /tasks/{id} (not /close or /reopen)
+		if strings.HasPrefix(path, "/tasks/") && !strings.HasSuffix(path, "/close") && !strings.HasSuffix(path, "/reopen") {
+			taskID := strings.TrimPrefix(path, "/tasks/")
+			taskID = strings.Split(taskID, "/")[0]
+
+			var req todoist.UpdateTaskRequest
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				http.Error(w, "invalid request body", http.StatusBadRequest)
+				return
+			}
+
+			task, err := widget.client.UpdateTask(ctx, taskID, &req)
+			if err != nil {
+				slog.Error("Failed to update Todoist task", "error", err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			widget.scheduleEarlyUpdate()
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(task)
+			return
+		}
+		http.Error(w, "unknown action", http.StatusNotFound)
+
 	case http.MethodDelete:
-		// Delete a task
-		// Extract task ID from path like /tasks/{id}
-		path := strings.TrimPrefix(r.URL.Path, "/api/widgets/"+fmt.Sprint(widget.ID)+"/tasks/")
-		if path == "" {
+		// Delete a task: /tasks/{id}
+		taskPath := strings.TrimPrefix(path, "/tasks/")
+		if taskPath == "" || taskPath == path {
 			http.Error(w, "invalid task ID", http.StatusBadRequest)
 			return
 		}
 
-		taskID := strings.Split(path, "/")[0]
+		taskID := strings.Split(taskPath, "/")[0]
 		if err := widget.client.DeleteTask(ctx, taskID); err != nil {
 			slog.Error("Failed to delete Todoist task", "error", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)

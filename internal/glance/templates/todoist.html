@@ -1,85 +1,284 @@
-{{ template "widget-base.html" . }}
-
-{{ define "widget-content" }}
+{{ template "widget-base.html" . }} {{ define "widget-content" }}
 <div class="todoist" data-widget-id="{{ .GetID }}">
-	{{ if .ErrorMessage }}
-	<div class="todoist-error">{{ .ErrorMessage }}</div>
-	{{ else }}
-	{{ if .Tasks }}
-	<div class="todoist-tasks{{ if .CompactMode }} todoist-compact{{ end }}">
-		{{ range .Tasks }}
-		<div class="todoist-task{{ if .Task.IsCompleted }} todoist-task-completed{{ end }} {{ if .Task.ParentID }} todoist-subtask{{ end }}"
-			 data-task-id="{{ .Task.ID }}"
-			 data-content="{{ .Task.Content }}"
-			 data-has-subtasks="{{ .HasSubtasks }}">
-			<div class="todoist-task-header">
-				<input type="checkbox"
-					   class="todoist-checkbox"
-					   {{ if .Task.IsCompleted }}checked{{ end }}
-					   data-task-id="{{ .Task.ID }}"
-					   aria-label="Mark task as complete">
-				<div class="todoist-task-content">
-					<span class="todoist-task-title">{{ .Task.Content }}</span>
-					{{ if and .Task.Description (not .HideDescription) }}
-					<div class="todoist-task-description">{{ .Task.Description }}</div>
-					{{ end }}
-				</div>
-				<div class="todoist-task-meta">
-					{{ if .Task.Due }}
-					<span class="todoist-due{{ if .Task.Due.IsRecurring }} todoist-recurring{{ end }}">{{ .Task.Due.String }}</span>
-					{{ end }}
-					{{ if .Task.Deadline }}
-					<span class="todoist-deadline" title="Deadline">{{ .Task.Deadline.Date }}</span>
-					{{ end }}
-					{{ if gt .Task.Priority 1 }}
-					<span class="todoist-priority todoist-priority-{{ .Task.Priority }}" title="Priority {{ .Task.Priority }}"></span>
-					{{ end }}
-					{{ if .Labels }}
-					<div class="todoist-labels">
-						{{ range .Labels }}
-						<span class="todoist-label" style="background-color: {{ .Color }}">{{ .Name }}</span>
-						{{ end }}
-					</div>
-					{{ end }}
-					{{ if .Project }}
-					<span class="todoist-project" style="color: {{ .Project.Color }}">{{ .Project.Name }}</span>
-					{{ end }}
-					{{ if gt .Task.CommentCount 0 }}
-					<span class="todoist-comments" title="{{ .Task.CommentCount }} comments">
-						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-							<path fill-rule="evenodd" d="M10 2c-2.236 0-4.43.18-6.57.524C1.993 2.755 1 4.014 1 5.426v5.148c0 1.413.993 2.67 2.43 2.902.17.032.342.062.514.091v2.209a1.125 1.125 0 001.628 1.006l2.632-1.487c.287-.163.603-.267.932-.296a24.477 24.477 0 004.864-.736c2.137-.345 3.43-2.49 3.43-4.606V5.426c0-1.412-.993-2.671-2.43-2.902A41.496 41.496 0 0010 2zM6.75 6a.75.75 0 01.75-.75h6.5a.75.75 0 010 1.5h-6.5A.75.75 0 016.75 6zm0 2.5a.75.75 0 01.75-.75h6.5a.75.75 0 010 1.5h-6.5a.75.75 0 01-.75-.75z" clip-rule="evenodd" />
-						</svg>
-						{{ .Task.CommentCount }}
-					</span>
-					{{ end }}
-				</div>
-				<button class="todoist-delete" data-task-id="{{ .Task.ID }}" aria-label="Delete task">
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-						<path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z" clip-rule="evenodd" />
-					</svg>
-				</button>
-			</div>
-			{{ if .HasSubtasks }}
-			<div class="todoist-subtasks" data-parent-id="{{ .Task.ID }}">
-				<!-- Subtasks would be dynamically loaded here -->
-			</div>
-			{{ end }}
-		</div>
-		{{ end }}
-	</div>
-	{{ else }}
-	<div class="todoist-empty">No tasks found</div>
-	{{ end }}
-	{{ end }}
+  {{ if .ErrorMessage }}
+  <div class="widget-error">{{ .ErrorMessage }}</div>
+  {{ else }} {{ if .Tasks }}
+  <ul class="list list-gap-14 collapsible-container" data-collapse-after="{{ .CollapseAfter }}">
+    {{ range .Tasks }}
+    <li class="todoist-task{{ if .Task.IsCompleted }} todoist-task-completed{{ end }} {{ if .Task.ParentID }} todoist-subtask{{ end }}"
+        data-task-id="{{ .Task.ID }}"
+        data-content="{{ .Task.Content }}"
+        data-description="{{ .Task.Description }}"
+        data-priority="{{ .Task.Priority }}"
+        data-due="{{ if .Task.Due }}{{ .Task.Due.String }}{{ end }}"
+        data-has-subtasks="{{ .HasSubtasks }}">
+      <div class="flex gap-10">
+        <input type="checkbox"
+               class="todoist-checkbox"
+               {{ if .Task.IsCompleted }}checked{{ end }}
+               data-task-id="{{ .Task.ID }}"
+               aria-label="Mark task as complete" />
+        <div class="grow min-width-0">
+          <div class="todoist-task-content">
+            <span class="title size-text-dynamic{{ if .Task.IsCompleted }} text-strikethrough{{ end }}">{{ .Task.Content }}</span>
+            {{ if .Task.Description }}
+            <button class="todoist-desc-toggle text-compact text-subdued"
+                    data-task-id="{{ .Task.ID }}"
+                    aria-label="Toggle description">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="inline-block vertical-align-middle width-1 height-1 margin-left-1">
+                <path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <div class="todoist-task-description collapsed" data-task-id="{{ .Task.ID }}">
+              {{ .Task.Description }}
+            </div>
+            {{ end }}
+          </div>
+          <ul class="list-horizontal-text flex-nowrap text-compact">
+            {{ if .Task.Due }}
+            <li class="{{ if .Task.Due.IsRecurring }}text-subdued{{ end }}">{{ .Task.Due.String }}</li>
+            {{ end }}
+            {{ if .Task.Deadline }}
+            <li class="color-negative">Deadline: {{ .Task.Deadline.Date }}</li>
+            {{ end }}
+            {{ if gt .Task.Priority 1 }}
+            <li>
+              <span class="todoist-priority todoist-priority-{{ .Task.Priority }}"
+                    title="Priority {{ .Task.Priority }}"></span>
+            </li>
+            {{ end }}
+            {{ if .Labels }}
+            {{ range .Labels }}
+            <li><span class="tag" style="background-color: {{ .Color }}">{{ .Name }}</span></li>
+            {{ end }}
+            {{ end }}
+            {{ if .Project }}
+            <li><span class="text-subdued" style="color: {{ .Project.Color }}">{{ .Project.Name }}</span></li>
+            {{ end }}
+            <li>
+              <button class="todoist-comments-btn text-subdued"
+                      data-task-id="{{ .Task.ID }}"
+                      data-comment-count="{{ .Task.CommentCount }}"
+                      title="Comments">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="inline-block width-1 height-1 margin-right-1">
+                  <path fill-rule="evenodd" d="M10 2c-2.236 0-4.43.18-6.57.524C1.993 2.755 1 4.014 1 5.426v5.148c0 1.413.993 2.67 2.43 2.902.17.032.342.062.514.091v2.209a1.125 1.125 0 001.628 1.006l2.632-1.487c.287-.163.603-.267.932-.296a24.477 24.477 0 004.864-.736c2.137-.345 3.43-2.49 3.43-4.606V5.426c0-1.412-.993-2.671-2.43-2.902A41.496 41.496 0 0010 2zM6.75 6a.75.75 0 01.75-.75h6.5a.75.75 0 010 1.5h-6.5A.75.75 0 016.75 6zm0 2.5a.75.75 0 01.75-.75h6.5a.75.75 0 010 1.5h-6.5a.75.75 0 01-.75-.75z" clip-rule="evenodd" />
+                </svg>
+                <span class="todoist-comment-count">{{ .Task.CommentCount }}</span>
+              </button>
+            </li>
+          </ul>
+          <!-- Task actions -->
+          <div class="todoist-task-actions flex gap-5 margin-top-1">
+            <button class="todoist-subtask-btn text-subdued"
+                    data-task-id="{{ .Task.ID }}"
+                    aria-label="Add subtask"
+                    title="Add subtask">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="width-1 height-1">
+                <path d="M10.75 6.75a.75.75 0 0 0-1.5 0v2.5h-2.5a.75.75 0 0 0 0 1.5h2.5v2.5a.75.75 0 0 0 1.5 0v-2.5h2.5a.75.75 0 0 0 0-1.5h-2.5v-2.5Z" />
+              </svg>
+            </button>
+            <button class="todoist-edit text-subdued"
+                    data-task-id="{{ .Task.ID }}"
+                    aria-label="Edit task">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="width-1 height-1">
+                <path d="m5.433 13.917 1.262-3.155A4 4 0 0 1 7.58 9.42l6.92-6.918a2.121 2.121 0 0 1 3 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 0 1-.65-.65Z" />
+                <path d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0 0 10 3H4.75A2.75 2.75 0 0 0 2 5.75v9.5A2.75 2.75 0 0 0 4.75 18h9.5A2.75 2.75 0 0 0 17 15.25V10a.75.75 0 0 0-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5Z" />
+              </svg>
+            </button>
+            <button class="todoist-delete text-subdued"
+                    data-task-id="{{ .Task.ID }}"
+                    aria-label="Delete task">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="width-1 height-1">
+                <path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
+          <!-- Subtask creation form (hidden by default) -->
+          <div class="todoist-subtask-form collapsed margin-top-2"
+               data-parent-id="{{ .Task.ID }}">
+            <div class="flex gap-2">
+              <input type="text"
+                     class="todoist-subtask-input grow"
+                     placeholder="Add subtask..."
+                     aria-label="Subtask content" />
+              <button type="button" class="todoist-subtask-submit button button-small">Add</button>
+              <button type="button" class="todoist-subtask-cancel button button-small button-secondary">Cancel</button>
+            </div>
+          </div>
+          <!-- Comments section (hidden by default) -->
+          <div class="todoist-comments-section collapsed margin-top-2"
+               data-task-id="{{ .Task.ID }}">
+            <div class="todoist-comments-list"></div>
+            <div class="todoist-comment-form margin-top-2">
+              <textarea class="todoist-comment-input width-full"
+                        placeholder="Add a comment..."
+                        rows="2"></textarea>
+              <button type="button" class="todoist-comment-submit button button-small margin-top-1">
+                Add Comment
+              </button>
+            </div>
+          </div>
+          {{ if .Subtasks }}
+          <ul class="todoist-subtasks list list-gap-8 margin-left-3 margin-top-1" data-parent-id="{{ .Task.ID }}">
+            {{ range .Subtasks }}
+            <li class="todoist-task todoist-subtask{{ if .Task.IsCompleted }} todoist-task-completed{{ end }}"
+                data-task-id="{{ .Task.ID }}"
+                data-content="{{ .Task.Content }}"
+                data-description="{{ .Task.Description }}"
+                data-priority="{{ .Task.Priority }}"
+                data-parent-id="{{ .Task.ParentID }}">
+              <div class="flex gap-10">
+                <input type="checkbox"
+                       class="todoist-checkbox"
+                       {{ if .Task.IsCompleted }}checked{{ end }}
+                       data-task-id="{{ .Task.ID }}"
+                       aria-label="Mark subtask as complete" />
+                <div class="grow min-width-0">
+                  <span class="title size-text-dynamic{{ if .Task.IsCompleted }} text-strikethrough{{ end }}">{{ .Task.Content }}</span>
+                  {{ if .Task.Description }}
+                  <div class="todoist-task-description text-compact text-subdued margin-top-1">{{ .Task.Description }}</div>
+                  {{ end }}
+                  <div class="todoist-task-actions flex gap-5 margin-top-1">
+                    <button class="todoist-edit text-subdued"
+                            data-task-id="{{ .Task.ID }}"
+                            aria-label="Edit subtask">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="width-1 height-1">
+                        <path d="m5.433 13.917 1.262-3.155A4 4 0 0 1 7.58 9.42l6.92-6.918a2.121 2.121 0 0 1 3 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 0 1-.65-.65Z" />
+                        <path d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0 0 10 3H4.75A2.75 2.75 0 0 0 2 5.75v9.5A2.75 2.75 0 0 0 4.75 18h9.5A2.75 2.75 0 0 0 17 15.25V10a.75.75 0 0 0-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5Z" />
+                      </svg>
+                    </button>
+                    <button class="todoist-delete text-subdued"
+                            data-task-id="{{ .Task.ID }}"
+                            aria-label="Delete subtask">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="width-1 height-1">
+                        <path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z" clip-rule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </li>
+            {{ end }}
+          </ul>
+          {{ end }}
+        </div>
+      </div>
+    </li>
+    {{ end }}
+  </ul>
+  {{ else }}
+  <div class="widget-empty">No tasks found</div>
+  {{ end }} {{ end }}
 
-	<div class="todoist-add-task">
-		<form class="todoist-add-form" data-widget-id="{{ .GetID }}">
-			<input type="text"
-				   class="todoist-add-input"
-				   placeholder="Add a task..."
-				   aria-label="New task content">
-			<button type="submit" class="todoist-add-button">+</button>
-		</form>
-	</div>
+  <!-- Add task form -->
+  <div class="todoist-add-task margin-top-3 padding-top-2 border-top-1">
+    <form class="todoist-add-form flex gap-2" data-widget-id="{{ .GetID }}">
+      <input type="text"
+             class="todoist-add-input grow"
+             placeholder="Add a task..."
+             aria-label="New task content" />
+      <button type="submit" class="todoist-add-button button">+</button>
+    </form>
+  </div>
+
+  <!-- Rich Text Editor Modal -->
+  <div class="todoist-editor-modal collapsed" data-widget-id="{{ .GetID }}">
+    <div class="editor-overlay"></div>
+    <div class="editor-container">
+      <div class="editor-header">
+        <span class="editor-title">Edit</span>
+        <button class="editor-close" aria-label="Close editor">&times;</button>
+      </div>
+      <div class="editor-toolbar">
+        <button type="button" data-format="bold" title="Bold (Ctrl+B)"><strong>B</strong></button>
+        <button type="button" data-format="italic" title="Italic (Ctrl+I)"><em>I</em></button>
+        <button type="button" data-format="strikethrough" title="Strikethrough"><s>S</s></button>
+        <span class="toolbar-separator"></span>
+        <button type="button" data-format="link" title="Link (Ctrl+K)">🔗</button>
+        <button type="button" data-format="code" title="Inline Code (Ctrl+`)">‹›</button>
+        <button type="button" data-format="codeblock" title="Code Block">{ }</button>
+        <span class="toolbar-separator"></span>
+        <button type="button" data-format="h1" title="Heading 1">H1</button>
+        <button type="button" data-format="h2" title="Heading 2">H2</button>
+        <button type="button" data-format="h3" title="Heading 3">H3</button>
+        <span class="toolbar-separator"></span>
+        <button type="button" data-format="ul" title="Bullet List">• List</button>
+        <button type="button" data-format="ol" title="Numbered List">1. List</button>
+        <span class="toolbar-separator"></span>
+        <button type="button" class="editor-preview-toggle active" title="Toggle Preview">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style="width:16px;height:16px">
+            <path d="M10 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z"/>
+            <path fill-rule="evenodd" d="M.664 10.59a1.651 1.651 0 010-1.186A10.004 10.004 0 0110 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0110 17c-4.257 0-7.893-2.66-9.336-6.41zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+          </svg>
+          Preview
+        </button>
+      </div>
+      <div class="editor-body">
+        <textarea class="editor-input" placeholder="Write with markdown..."></textarea>
+        <div class="editor-preview"></div>
+      </div>
+      <div class="editor-footer">
+        <span class="editor-hint">Ctrl+Enter to save • Escape to cancel</span>
+        <div class="editor-actions">
+          <button type="button" class="editor-cancel button button-secondary">Cancel</button>
+          <button type="button" class="editor-save button">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Task Edit Modal (for due date/priority) -->
+  <div class="todoist-modal collapsed" data-widget-id="{{ .GetID }}">
+    <div class="modal-overlay"></div>
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Edit Task</h3>
+        <button class="modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <form class="todoist-edit-form">
+        <input type="hidden" name="taskId" class="todoist-edit-task-id" />
+        <div class="form-group">
+          <label for="todoist-edit-content">Task</label>
+          <textarea name="content"
+                    id="todoist-edit-content"
+                    class="todoist-edit-content width-full"
+                    rows="2"
+                    required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="todoist-edit-description">Description</label>
+          <textarea name="description"
+                    id="todoist-edit-description"
+                    class="todoist-edit-description width-full"
+                    rows="3"></textarea>
+        </div>
+        <div class="flex gap-2">
+          <div class="form-group grow">
+            <label for="todoist-edit-due">Due Date</label>
+            <input type="text"
+                   name="due_string"
+                   id="todoist-edit-due"
+                   class="todoist-edit-due width-full"
+                   placeholder="e.g. tomorrow, next Monday" />
+          </div>
+          <div class="form-group grow">
+            <label for="todoist-edit-priority">Priority</label>
+            <select name="priority"
+                    id="todoist-edit-priority"
+                    class="todoist-edit-priority width-full">
+              <option value="1">Normal</option>
+              <option value="2">Medium</option>
+              <option value="3">High</option>
+              <option value="4">Urgent</option>
+            </select>
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 margin-top-2">
+          <button type="button" class="todoist-modal-cancel button button-secondary">Cancel</button>
+          <button type="submit" class="todoist-modal-save button">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 {{ end }}
